@@ -1,0 +1,2 @@
+# pye-ed
+Estadística Descriptiva
