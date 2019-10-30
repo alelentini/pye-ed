@@ -1,284 +1,131 @@
+// Decimal digits
+var DEC_DIGITS = 2;
 
-/*--------------------------------------------------------------------------------------------------------*/
-// Mathematical Objects
-/*--------------------------------------------------------------------------------------------------------*/
+// Sample data
+var sample = {};
 
-// Factorials Object
-var factorials = {
+
+// App initialization
+function initED() {
     
-    // Pre-calcuated values: 0 to 10
-    y: [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800],
+    // Renders cells with Latex
+    MathJax.Hub.Typeset();
+}
+
+
+// Calculates descriptive statistics
+function calculateSample() {
     
-    // Calculates factorial of n and stores it in pre-calcuated values
-    calc: function(n) {
-        if(n >= this.y.length) {
-            for(var i = this.y.length; i <= n; i++) {
-                this.y.push(math.factorial(i));
-            }
-        }
-        return this.y[n];
+    // If exists data
+    if(document.getElementById('input-data').value != '') {
+
+        // Process sample
+        sample.data   = document.getElementById('input-data').value.replace(/ /g, '').split(',').map(x => parseFloat(x));
+        sample.n      = sample.data.length;
+        sample.min    = math.min(sample.data);
+        sample.max    = math.max(sample.data);
+        sample.range  = sample.max - sample.min;
+        sample.mean   = math.mean(sample.data);
+        sample.median = math.median(sample.data);
+        sample.mode   = math.mode(sample.data);
+        sample.var    = math.variance(sample.data);
+        sample.std    = math.std(sample.data);
+        sample.q1     = math.quantileSeq(sample.data, 0.25, false);
+        sample.q2     = math.quantileSeq(sample.data, 0.5, false);
+        sample.q3     = math.quantileSeq(sample.data, 0.75, false);
+
+        // Updates Summary metric table
+        updateSummMetrics();
+
+        // Updates charts
+        updateCharts();
+    }    
+}
+
+
+// Updates Summary metric table
+function updateSummMetrics() {
+
+    var rows = document.getElementById('summMetrics-tbl_body').rows;
+
+    rows[0].cells[2].innerHTML  = sample.n;                              // n
+    rows[2].cells[2].innerHTML  = sample.min.toFixed(DEC_DIGITS);        // Min
+    rows[3].cells[2].innerHTML  = sample.max.toFixed(DEC_DIGITS);        // Max
+    rows[4].cells[2].innerHTML  = sample.range.toFixed(DEC_DIGITS);      // Range
+    rows[5].cells[2].innerHTML  = sample.std.toFixed(DEC_DIGITS);        // Standard Deviation
+    rows[6].cells[2].innerHTML  = sample.var.toFixed(DEC_DIGITS);        // Variance
+    rows[8].cells[2].innerHTML  = sample.mean.toFixed(DEC_DIGITS);       // Mean
+    rows[9].cells[2].innerHTML  = sample.median.toFixed(DEC_DIGITS);     // Median
+    //rows[10].cells[2].innerHTML = sample.mode.join('; ');               // Mode
+    rows[12].cells[2].innerHTML = sample.q1.toFixed(DEC_DIGITS);         // Cuartile 1
+    rows[13].cells[2].innerHTML = sample.q2.toFixed(DEC_DIGITS);         // Cuartile 2
+    rows[14].cells[2].innerHTML = sample.q3.toFixed(DEC_DIGITS);         // Cuartile 3
+    
+    // Shows table
+    document.getElementById('summMetrics').classList.remove('d-none');
+}
+
+
+// Updates charts
+function updateCharts() {
+    
+
+    // Chart data: Box-plot
+    var data = [{
+        x: sample.data,
+        text: [],
+        boxpoints: 'all',
+        jitter: 0.3,
+        pointpos: -1.8,
+        type: 'box',
+        boxmean: 'sd',
+        marker: {color: 'rgb(10,140,208)'},
+        name: '',
+        hovertemplate: '<i>Observación:</i> <b>%{text}</b>' +
+                       '<br><i>Valor:</i> <b>%{x}</b>',
+        hoverlabel: {bgcolor: 'white', font: {color: 'black'}}
+    }];
+    for(var i = 0; i < sample.data.length; i++) {
+        data[0].text.push(i + 1);
     }
-};
 
-
-
-
-/*--------------------------------------------------------------------------------------------------------*/
-// Binomial Distributions
-/*--------------------------------------------------------------------------------------------------------*/
-
-// Binomial Distribution Object
-class Binomial {
+    // Chart data: Histogram
+    data[1] = {
+        x: sample.data,
+        type: 'histogram',
+        marker: {color: 'rgba(10,140,208,0.7)', line: {color: 'rgba(10,140,208,1)', width: 2}},
+        opacity: 0.75,
+        xbins: {start: math.floor(sample.min), end: math.ceil(sample.max), size: (math.ceil(sample.max) - math.floor(sample.min)) / math.ceil(math.sqrt(sample.n))},
+        name: '',
+        hovertemplate: '<i>Intervalo de clase:</i> <b>%{x}</b>' +
+                       '<br><i>Observaciones:</i> <b>%{y}</b>',
+        hoverlabel: {bgcolor: 'white', font: {color: 'black'}}
+    };
     
-    constructor(n, p) {
-        // Properties
-        this.n = n;                             // Number of trials
-        this.p = p;                             // Probability of success
-        this.q = 1 - p;                         // Probability of failure
-        this.mean = n * p;                      // Mean
-        this.var = n * p * (1 - p);             // Standard deviation
-        this.x = [];                            // X values
-        this.y = [];                            // Y values: Probability mass function
-        this.y2 = [];                           // Y2 values: Acumulative distribution function
-
-        // Calculates distribution values
-        this.calc(n, p);
-    }
+    // Charts Layout
+    var layout = [
+        // Chart 1: Box-plot
+        {
+            autosize: false, 
+            height: 200, 
+            margin: {b: 20, t: 0, p: 5},
+            xaxis: {range: [math.floor(sample.min), math.ceil(sample.max)]}
+        },
         
-    // Calc method -> Calculates distribution
-    calc(n, p) {
-        var i;                              // Iterator
-        var bc;                             // Binomial coefficient
-        var n_fact = factorials.calc(n);    // n!
-        var cp = 0;                         // Cumulative proability
-        var y;                              // Probability value
-
-        this.n = n;
-        this.p = p;
-        this.q = 1 - p;
-        this.mean = n * p;
-        this.var = n * p * (1 - p);
-        this.x = [];
-        this.y = [];
-        this.y2 = [];
-        for(i = 0; i <= n; i++) {
-            this.x.push(i);
-            if(i == 0 || i == n) {
-                bc = 1;
-            } else {
-                bc = n_fact / (factorials.calc(i) * factorials.calc(n - i));
-            }
-            y = bc * math.pow(p, i) * math.pow(this.q, n - i);
-            this.y.push(math.round(y, 6));
-            cp += y;
-            this.y2.push(math.round(cp, 6));
-        }
-    }
-}
-
-
-// Updates HTML elements and JS objects for a new value of parameter n
-function update_bin_n(n) {
-    
-    document.getElementById('bin-dis-n_lbl_val').innerHTML = n;
-}
-
-// Updates HTML elements and JS objects for a new value of parameter p
-function update_bin_p(p) {
-    
-    document.getElementById('bin-dis-p_lbl_val').innerHTML = Number.parseFloat(p).toFixed(2);
-}
-
-
-// Updates Binomial Distribution
-function update_bin_dis() {
-
-    var n = parseInt(document.getElementById('bin-dis-n_input').value);
-    var p = parseFloat(document.getElementById('bin-dis-p_input').value);
-
-    // Instantiates or updates first binomial distribution object
-    if(bin1 === undefined) {
-        bin1 = new Binomial(n, p);
-    } else {
-        bin1.calc(n, p);
-    }
-
-    // Updates metrics values
-    document.getElementById('bin-dis-mean').innerHTML = bin1.mean.toFixed(2);
-    document.getElementById('bin-dis-var').innerHTML = bin1.var.toFixed(2);
-
-    // Updates data table
-    update_bin_table();
-
-    // Updates chart
-    update_bin_chart(n);
-}
-
-
-// Updates Binomial Chart
-function update_bin_chart(n) {
-
-    // Data series
-    binChart.data = [
-        // PMF data
+        // Chart 2: Histogram
         {
-            name: '$\\text{fmp: }P(X = x)$',
-            x: bin1.x,
-            y: bin1.y,
-            type: 'scatter',
-            mode: 'markers',
-            marker: {color: 'red', size: 5},
-            hoverlabel: {bgcolor: 'white'},
-            hovertemplate: '<i>P(X = %{x}) = </i> <b>%{y:.4f}</b><extra></extra>',
-        },
-        // CDF data
-        {
-            name: '$\\text{FDA: }P(X \\leqslant x)$',
-            x: bin1.x,
-            y: bin1.y2,
-            type: 'scatter',
-            mode: 'lines+markers',
-            marker: {color: 'blue', size: 5},
-            line: {shape: 'hv', width: 0.8},
-            hoverlabel: {bgcolor: 'white'},
-            hovertemplate: '<i>P(X <= %{x}) = </i> <b>%{y:.4f}</b><extra></extra>',
-        },
-        // Mean data
-        {
-            name: '$\\mu$',
-            x: [bin1.mean, bin1.mean],
-            y: [0, 1],
-            mode: 'lines',
-            line: {color: 'green', width: 1, dash: 'dashdot'},
-            hoverlabel: {bgcolor: 'white'},
-            hovertemplate: '<i>E(X) = </i> <b>' + bin1.mean.toFixed(4) + '<extra></extra>',
+            autosize: false, 
+            height: 300, 
+            margin: {b: 20, t: 2, p: 5},
+            xaxis: {range: [math.floor(sample.min), math.ceil(sample.max)]}
         }
     ];
-    if(!document.getElementById('bin-dis_pmf_cb').checked) {
-        binChart.data[0].visible = false;
-    } else if(!document.getElementById('bin-dis_cdf_cb').checked) {
-        binChart.data[1].visible = false;
-    } else if(!document.getElementById('bin-dis_mean_cb').checked) {
-        binChart.data[2].visible = false;
-    }
 
-    // Chart settings
-    binChart.layout = {
-        //title: {text: '$\\text{Función masa de probabilidad: }P(X = x) = p(x)$'},
-        //legend: {x: 1, y: 0.5},
-        showlegend: false,
-        xaxis: {
-            title: {text: '$\\text{Número de éxitos: }X$'},
-            showgrid: false,
-            ticks: 'outside'
-        },
-        yaxis: {
-            title: {text: '$\\text{Probabilidad}$'},
-            showgrid: false,
-            ticks: 'outside',
-            tickformat: '.2f'
-        }
-    };
-    if(n <= 30) {
-        binChart.layout.xaxis.autotick = false;
-        binChart.layout.xaxis.range = [0, n + 1];
-        binChart.layout.xaxis.dtick = 1;
-    }
-    Plotly.newPlot('bin-chart', binChart.data, binChart.layout);
-}
+    Plotly.newPlot('chart0', [data[0]], layout[0], {displayModeBar: false});
+    Plotly.newPlot('chart1', [data[1]], layout[1], {displayModeBar: false});
 
-
-// Updates data table
-function update_bin_table() {
-    
-    var i;
-    var j = bin1.x.length;
-    var s ='';
-
-    for(i = 0; i < j; i++) {
-        s += '<tr>' + 
-                '<td>' + bin1.x[i] + '</td>' + 
-                '<td>' + bin1.y[i].toFixed(4) + '</td>' + 
-                '<td>' + bin1.y2[i].toFixed(4) + '</td>' +
-                '<td>' + (1 - bin1.y2[i]).toFixed(4) + '</td>' + 
-             '</tr>';
-    }
-    document.getElementById('bin-dis-tbl_body').innerHTML = s;
-}
-
-
-// Animates Binomial Chart
-/*function animate_bin_cart(par) {
-    var parRange = [];
-    switch(par) {
-        case 'n':
-            
-    }
-}*/
-
-
-
-/*--------------------------------------------------------------------------------------------------------*/
-// Global Variables & Init Function
-/*--------------------------------------------------------------------------------------------------------*/
-
-var bin1;               // First binomial distribution instance
-var bin2;               // Second binomial distribution instance
-var binChart = {        // Binomial distribution chart object
-    data: [],
-    layout: {},
-    toggle: function (cName) {
-        switch(cName) {
-            case 'pmf':
-                if(document.getElementById('bin-dis_pmf_cb').checked) {
-                    Plotly.restyle('bin-chart', {visible: true}, 0);
-                } else {
-                    Plotly.restyle('bin-chart', {visible: false}, 0);
-                }
-                break;
-            case 'cdf':
-                if(document.getElementById('bin-dis_cdf_cb').checked) {
-                    Plotly.restyle('bin-chart', {visible: true}, 1);
-                } else {
-                    Plotly.restyle('bin-chart', {visible: false}, 1);
-                }
-                break;
-            case 'mean':
-                if(document.getElementById('bin-dis_mean_cb').checked) {
-                    Plotly.restyle('bin-chart', {visible: true}, 2);
-                } else {
-                    Plotly.restyle('bin-chart', {visible: false}, 2);
-                }
-                break;
-        }
-    }
-};
-
-
-// Initializes DP application -> Called by onload event 
-function initDP() {
-
-    // Updates Binomial Distribution
-    update_bin_dis();
-    
-    // Updates Latex
-    update_latex();
-}
-
-
-// Updates Latex
-function update_latex() {
-    
-    MathJax.Hub.Queue(['Typeset',MathJax.Hub,'bin-dis_formula']);
-    MathJax.Hub.Queue(['Typeset',MathJax.Hub,'bin-dis_ds_fmp']);
-    MathJax.Hub.Queue(['Typeset',MathJax.Hub,'bin-dis_ds_cdf']);
-    MathJax.Hub.Queue(['Typeset',MathJax.Hub,'bin-dis_ds_mean']);
-    MathJax.Hub.Queue(['Typeset',MathJax.Hub,'bin-dis-mean_lbl']);
-    MathJax.Hub.Queue(['Typeset',MathJax.Hub,'bin-dis-var_lbl']);
-    MathJax.Hub.Queue(['Typeset',MathJax.Hub,'bin-dis-n_lbl2']);
-    MathJax.Hub.Queue(['Typeset',MathJax.Hub,'bin-dis-p_lbl2']);
-    MathJax.Hub.Queue(['Typeset',MathJax.Hub,'bin-dis-otbl_f1']);
-    MathJax.Hub.Queue(['Typeset',MathJax.Hub,'bin-dis-otbl_f2']);
-    MathJax.Hub.Queue(['Typeset',MathJax.Hub,'bin-dis-otbl_f3']);
-    MathJax.Hub.Queue(['Typeset',MathJax.Hub,'bin-dis-otbl_f4']);
+    // Shows charts
+    document.getElementById('chart0').classList.remove('d-none');
+    document.getElementById('chart1').classList.remove('d-none');
+    document.getElementById('chart1_fnote').classList.remove('d-none');
 }

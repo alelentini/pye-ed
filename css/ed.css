@@ -1,6 +1,6 @@
-/*-----------------------------------------------*/
-/* DISTRIBUCIONES DE PROBABILIDAD CSS Stylesheet */
-/*-----------------------------------------------*/
+/*----------------------------------------*/
+/* ESTADÍSTICA DESCRIPTIVA CSS Stylesheet */
+/*----------------------------------------*/
 
 .custom-range {
     width: 50%;
@@ -8,13 +8,41 @@
 
 .table th, td {
     text-align: center;   
- }
+}
 
- .padding-tb-10 {
-     padding-top: 10px;
-     padding-bottom: 10px;
- }
+.row-h1 {
+    font-style: italic;
+    font-weight: bold;
+    background-color: lightgrey;
+}
 
- .padding-t-15 {
+.padding-tb-10 {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.padding-t-15 {
     padding-top: 15px;
+}
+
+#summMetrics-tbl tr td:nth-child(1){
+    width: 50%;
+}
+
+#summMetrics-tbl tr td:nth-child(2){
+    width: 25%;
+}
+
+#summMetrics-tbl tr td:nth-child(3){
+    width: 25%;
+}
+
+.margin-10 {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.foot-note {
+    font-size: 80%;
+    color: grey;
 }
