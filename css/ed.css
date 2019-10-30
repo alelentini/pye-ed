@@ -1,0 +1,20 @@
+/*-----------------------------------------------*/
+/* DISTRIBUCIONES DE PROBABILIDAD CSS Stylesheet */
+/*-----------------------------------------------*/
+
+.custom-range {
+    width: 50%;
+}
+
+.table th, td {
+    text-align: center;   
+ }
+
+ .padding-tb-10 {
+     padding-top: 10px;
+     padding-bottom: 10px;
+ }
+
+ .padding-t-15 {
+    padding-top: 15px;
+}

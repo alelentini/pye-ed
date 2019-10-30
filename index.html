@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+	<head>
+		<meta charset='utf-8'>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+		<meta name='viewport' content='width=device-width, initial-scale=1'>
+		<title>Distribuciones de Probabilidad</title>
+		<!-- Browser Icon -->
+		<link rel='shortcut icon' type='image/png' href='images/icon.png'>
+		<!-- Bootstrap CSS -->
+		<link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css'>
+		<!-- Custom CSS -->
+		<link rel='stylesheet' type='text/css' href='css/dp.css'>
+		<!-- MathJax JS -->
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_CHTML'></script>
+	</head>
+
+	<body onload='initDP()' style='font-family:Calibri'>
+		<div class='container-fluid'>
+			<!-- Navigation bar -->
+			<nav class="navbar bg-light sticky-top">
+				<!-- Main Title -->
+				<h5 style='font-style:italic'><strong>Distribuciones de Probabilidad</strong></h5>
+				<!-- Distribution Selector -->
+				<div class="dropdown float-left">
+					<div class="btn-group">
+						<button type="button" class="btn btn-sm" style='font-size:120%'><strong>Binomial</strong></button>
+						<button type="button" class="btn btn-sm dropdown-toggle dropdown-toggle-split" 
+							data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<span class="sr-only">Toggle Dropdown</span>
+						</button>
+						<div class="dropdown-menu" aria-labelledby="disSel">
+							<h6 class="dropdown-header">Distribuciones Discretas</h6>
+							<a class="dropdown-item active" href="#">Binomial</a>
+							<a class="dropdown-item disabled" href="#">Geométrica</a>
+							<a class="dropdown-item disabled" href="#">Binomial Negativa</a>
+							<a class="dropdown-item disabled" href="#">Multinomial</a>
+							<div class="dropdown-divider"></div>
+							<h6 class="dropdown-header">Distribuciones Continuas</h6>
+							<a class="dropdown-item disabled" href="#">Normal</a>
+						</div>
+					</div>
+				</div>
+				<div class='alert alert-warning float-right' role='alert'>
+					<strong><span style='font-size:120%'>&#9888;</span> Versión Alfa</strong>
+				</div>
+			</nav>
+			<!-- Binomial Distribution -->
+			<div class='row padding-tb-10' id='bin-dis'>
+				<div class='col-5'>
+					<!-- Formula -->
+					<div id='bin-dis_formula' class='row justify-content-center'>
+							$$X \sim \operatorname{B} \left({n, p}\right): p(x) = \binom{n}{x}p^{x}(1-p)^{n-x}$$
+					</div>
+					<!-- Parameters Inputs -->
+					<div class='row padding-tb-10'>
+						<!-- n -->
+						<div class='col-6'>
+							<label id='bin-dis-n_lbl' for='n'>Númerode ensayos: <b><span id='bin-dis-n_lbl2'>\(n\)</span> = 
+								<span id='bin-dis-n_lbl_val'>10</span></b></label>
+							<input type='range' class='custom-range' id='bin-dis-n_input' name='n' min='1' max='100'
+							value='10' step='1' oninput='update_bin_n(this.value)' onchange='update_bin_dis()'>
+						</div>
+						<!-- p -->
+						<div class='col-6'>
+							<label id='bin-dis-p_lbl' for='p'>Probabilidad de éxito: <b><span id='bin-dis-p_lbl2'>\(p\)</span> = 
+								<span id='bin-dis-p_lbl_val'>0.50</span></b>
+							</label>
+							<input type='range' class='custom-range' id='bin-dis-p_input' name='p' min='0' max='1' 
+								value='0.5' step='0.01' oninput='update_bin_p(this.value)' onchange='update_bin_dis()'>
+						</div>
+					</div>
+					<!-- Metrics -->
+					<div class='row padding-tb-10'>
+						<!-- Mean -->
+						<div class='col-6'>
+							Media: <strong><span id='bin-dis-mean_lbl'>\(\mu\)</span> = <span id='bin-dis-mean'>5.00</span></strong>
+						</div>
+						<!-- Variance -->
+						<div class='col-6'>
+							Varianza: <strong><span id='bin-dis-var_lbl'>\(\sigma^2\)</span> = <span id='bin-dis-var'>2.50</span></strong>
+						</div>
+					</div>
+					<!-- Output Table -->
+					<div class='row padding-tb-10'>
+						<table class="table table-sm table-hover" style='width:70%;margin:auto'>
+							<thead id='bin-dis-tbl_head' style='font-size:80%'>
+								<tr>
+									<th id='bin-dis-otbl_f1' scope="col">\(X\)</th>
+									<th id='bin-dis-otbl_f2' scope="col">\(P(X = x)\)</th>
+									<th id='bin-dis-otbl_f3' scope="col">\(P(X \leqslant x)\)</th>
+									<th id='bin-dis-otbl_f4' scope="col">\(P(X > x)\)</th>
+								</tr>
+							</thead>
+							<tbody id='bin-dis-tbl_body' style='font-size:80%'></tbody>
+						</table>
+					</div>
+				</div>
+				<!-- Charts -->
+				<div class='col-7'>
+					<!-- Data series selectors -->
+					<div class='row justify-content-center padding-t-15'>
+						<div class="form-check form-check-inline" style='margin-right:20px'>
+							<input class="form-check-input" type="checkbox" id="bin-dis_pmf_cb" checked 
+								onchange='binChart.toggle("pmf")'>
+							<label class="form-check-label" for="bin-dis_pmf_cb"><span style='font-size:150%;color:red'>&#8226;</span><span id='bin-dis_ds_fmp'>\(fmp: P(X = x)\)</span></label>
+						</div>
+						<div class="form-check form-check-inline" style='margin-right:20px'>
+							<input class="form-check-input" type="checkbox" id="bin-dis_mean_cb" checked
+								onchange='binChart.toggle("mean")'>
+							<label class="form-check-label" for="bin-dis_mean_cb"><span id='bin-dis_ds_mean'>\(E(X)\)</span></label>
+						</div>
+						<div class="form-check form-check-inline" style='margin-right:20px'>
+							<input class="form-check-input" type="checkbox" id="bin-dis_cdf_cb" checked
+								onchange='binChart.toggle("cdf")'>
+							<label class="form-check-label" for="bin-dis_cdf_cb"><span style='font-size:150%;color:blue'>&#8226;</span><span id='bin-dis_ds_cdf'>\(FDA: P(X \leqslant x)\)</span></label>
+						</div>
+					</div>
+					<!-- Plotly Chart -->
+					<div id='bin-chart'></div>
+				</div>
+			</div>
+		</div>
+		<!------------------------------------>
+		<!-- JavaScript external references -->
+		<!------------------------------------>
+		<!-- jQuery -->
+		<script src='https://code.jquery.com/jquery-3.3.1.slim.min.js'></script>
+		<!-- Popper -->
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js'></script>
+		<!-- Bootstrap -->
+		<script src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js'></script>
+		<!-- Math JS -->
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/6.0.3/math.min.js'></script>
+		<!-- Plotly.js -->
+		<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+		<!-- ENGI Project Page JS libraries -->
+		<script src="js/dp_main.js"></script>
+	</body>
+</html>
