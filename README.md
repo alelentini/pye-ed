@@ -1,4 +1,4 @@
-# Calculadora simple de estadística descriptiva
+# Calculadora básica de estadística descriptiva
 
 :warning: **Versión Alpha**
 
